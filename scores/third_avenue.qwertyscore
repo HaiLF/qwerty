@@ -1,0 +1,75 @@
+score.third_avenue = `
+
+title:3rd avenue
+author:Sound Souler
+bgm:3rd-Avenue.ogg
+bgmvol:0.75
+bpm:130
+offset:965
+
+path:
+
+def M 0,0 100,100
+fal M 0,0 C 50,0 100,50 100,100
+
+score:
+
+a 012789 fal -2 2 1 0
+x 0 def -1 0 0 -1600
+x 1 def -1 0 0 -1300
+x 2 def -1 0 0 -1000
+x 9 def -1 0 0 1600
+x 8 def -1 0 0 1300
+x 7 def -1 0 0 1000
+x 3 fal -0.1 3 -375 -580
+x 6 fal -0.1 3 375 580
+x 4 fal -0.1 3 -125 -180
+x 5 fal -0.1 3 125 180
+
+a 012789 fal 0 0.20 0 1
+a 1278 fal 0.2 0.20 1 0
+a 09 fal 0.8 0.8 1 0
+a 012789 fal 1 0.20 0 1
+a 0189 fal 1.2 0.20 1 0
+a 27 fal 1.8 0.8 1 0
+
+a 012789 fal 2 0.20 0 1
+a 1278 fal 2.2 0.20 1 0
+a 09 fal 2.8 0.8 1 0
+a 012789 fal 3 0.20 0 1
+a 0189 fal 3.2 0.20 1 0
+a 27 fal 3.8 0.8 1 0
+
+a 012789 fal 4 0.20 0 1
+a 1278 fal 4.2 0.20 1 0
+a 09 fal 4.8 0.8 1 0
+a 012789 fal 5 0.20 0 1
+a 0189 fal 5.2 0.20 1 0
+a 27 fal 5.8 0.8 1 0
+
+a 012789 fal 6 0.20 0 1
+a 1278 fal 6.2 0.20 1 0
+a 09 fal 6.8 0.8 1 0
+a 012789 fal 7 0.20 0 1
+a 0189 fal 7.2 0.20 1 0
+a 27 fal 7.8 0.8 1 0
+
+1 36 def 0 2
+1 36 def 1 2
+1 36 def 2 2
+1 36 def 3 2
+1 36 def 4 2
+1 36 def 5 2
+1 36 def 6 2
+1 36 def 7 2
+
+2 4 fal 0.75 2
+2 5 fal 1.5 2
+2 4 fal 2.75 2
+2 5 fal 3.5 2
+2 5 fal 4.75 2
+2 4 fal 5.5 2
+2 5 fal 6.75 2
+2 4 fal 7.5 2
+
+`
