@@ -47,6 +47,7 @@ let score = {},
     newPressed = new Array(10).fill(false),
     fullComboAmount = 0,
     laneKeys = (localStorage.getItem("lanekey") || "qwertyuiop").split(""),
+    noteSlot = 0;
     infoStyle = {
         ypos: 0, 
         alpha: 0
@@ -69,7 +70,7 @@ const judgeRate = {
     longNoteTerm:300
     },
     // colorList = {
-    //     backGround: "#101020",
+    //     backGround: "#101010",
     //     white: "#d0d0ff",
     //     tapNote: "#88ffff",
     //     tapNoteFill: "#88ffff44",
@@ -138,12 +139,12 @@ let defineLane = class {
         this.xpos = xpos * 1;
         this.ypos = ypos * 1;
         this.alpha = alpha * 1;
-        this.direction = direction * 1;
+        this.direction = direction * Math.PI * 2;
         this.keyNum = keyNum * 1;
     }
 
     isExpired(time) {
-        return time <= this.time;
+        return time >= this.time;
     }
 }
 
@@ -154,7 +155,7 @@ let deleteLane = class {
     }
     
     isExpired(time) {
-        return time <= this.time;
+        return time >= this.time;
     }
 }
 
@@ -284,7 +285,7 @@ let moveLanes =()=> {
         else time = (x.endTime - nowTime) / x.speed;
 
         switch (x.type) {
-            case "a": laneStates[x.lane].alpha = Math.max(0, Math.min(1, getPathFromX(x.path, (1 - time) * 100) / 100 * (x.max - x.min) + x.min)); break;
+            case "a": laneStates[x.lane].alpha = Math.max(0, getPathFromX(x.path, (1 - time) * 100) / 100 * (x.max - x.min) + x.min); break;
             case "d": laneStates[x.lane].direction = (getPathFromX(x.path, (1 - time) * 100) / 100 * (x.max - x.min) + x.min) * Math.PI * 2; break;
             case "x": laneStates[x.lane].xpos = getPathFromX(x.path, (1 - time) * 100) / 100 * (x.max - x.min) + x.min; break;
             case "y": laneStates[x.lane].ypos = getPathFromX(x.path, (1 - time) * 100) / 100 * (x.max - x.min) + x.min; break;
@@ -413,7 +414,8 @@ let judgeNotes =()=> {
 
     notes.some(x => {
 
-        if (x.endTime - x.speed > nowTime) return true;
+        if (x.endTime - judgeRate.lost > nowTime) return true;
+        if (!laneStates[x.lane]) return false;
         
         if ((x.type == "1" || x.type == "2") && !x.judge && x.endTime - nowTime < -judgeRate.far) {
             x.judge = "lost";
@@ -421,12 +423,10 @@ let judgeNotes =()=> {
             x.effected = true;
             return false;
         }
-
-        if (!laneStates[x.lane]) return false;
         
         switch (x.type) {
             case "1": {
-                if (!x.effected && nearestTapnote[laneStates[x.lane].keyNum].endTime - nowTime > x.endTime - nowTime) nearestTapnote[laneStates[x.lane].keyNum] = x;
+                if (!x.effected && Math.abs(nearestTapnote[laneStates[x.lane].keyNum].endTime - nowTime) > Math.abs(x.endTime - nowTime)) nearestTapnote[laneStates[x.lane].keyNum] = x;
             } break;
             case "2": {
                 if (!x.effected && pressed[laneStates[x.lane].keyNum]) {
@@ -556,8 +556,9 @@ let drawEffects =()=> {
         })
 
         if (x.sound) {
-            snd["se/note.ogg"].currentTime = 0.025;
-            snd["se/note.ogg"].play();
+            noteSlot = ++noteSlot % 16;
+            snd[`note_slot${noteSlot}`].currentTime = 0.025;
+            snd[`note_slot${noteSlot}`].play();
             x.sound = false;
         }
     });
@@ -618,7 +619,7 @@ let drawInfos =()=> {
 
 let deleteNotes =()=> {
     laneMoves = laneMoves.filter(x => x.endTime - nowTime > 0);
-    notes = notes.filter(x => !(x.effected && x.judge != "lost") && x.endTime - nowTime > -1000 || drewId[x.id]);
+    notes = notes.filter(x => (!(x.effected && x.judge != "lost") && x.endTime - nowTime > (x.id ? 0 : -1000)) || drewId[x.id]);
     metaData = metaData.filter(x => !x.isExpired(nowTime));
 }
 
@@ -652,11 +653,12 @@ let generateScore =(scoreName)=> {
     let notesTime = [];
     fullComboAmount = 0;
     score[scoreName].match(/score:((.|\n)*)/)[1].split("\n").filter(x=>x).forEach(x=>{
-        let arr = x.split(/ +/);
-        let reversed = arr[2].charAt(0) == "-";
-        let isMultiNote = arr[0] <= 2 && arr[1].length != 1;
+
+        let arr = x.split(/ +/), reversed, isMultiNote;
 
         if (["1", "2", "3", "4", "a", "d", "x", "y"].indexOf(arr[0]) > -1) {
+            reversed = arr[2].charAt(0) == "-";
+
             arr[2] = reversed ? pathes[arr[2].substr(1)].map(x=>x.map(x => x.map((x, y) => y >= 1 ? x * -1 + 200 : x))) : pathes[arr[2]];
             arr[3] *= 60 / bpm * 1000;
             arr[4] *= 60 / bpm * 1000;
@@ -664,14 +666,16 @@ let generateScore =(scoreName)=> {
             arr[2] *= 60 / bpm * 1000;
         }
 
-        if (arr[0] <= 2) {
+        if (arr[0] == "1" || arr[0] == "2") {
+            isMultiNote = arr[1].length != 1;
+
             fullComboAmount += arr[1].length;
             let index = notesTime.findIndex(x => x[0] <= arr[3]);
+
             if ((notesTime[index] || [])[0] == arr[3]) {
                 isMultiNote = true;
                 notes[notesTime[index][1]].isMultiNote = true;
-            }
-            else notesTime.splice(index, 0, [arr[3], notes.length]);
+            } else notesTime.splice(index, 0, [arr[3], notes.length]);
         }
 
         switch (arr[0]) {

@@ -7,12 +7,27 @@ bgm/dead_soul_by_sound_souler.ogg
 bgm/Destr0yer-feat-Nikki-Simmons.ogg
 bgm/cut173_edition_brain_power.ogg
 bgm/BPM_RT.ogg
-se/note.ogg
-`.split("\n").filter(x=>x!=""&&x.charAt(0)!="#");
+se/note.ogg note_slot0
+se/note.ogg note_slot1
+se/note.ogg note_slot2
+se/note.ogg note_slot3
+se/note.ogg note_slot4
+se/note.ogg note_slot5
+se/note.ogg note_slot6
+se/note.ogg note_slot7
+se/note.ogg note_slot8
+se/note.ogg note_slot9
+se/note.ogg note_slot10
+se/note.ogg note_slot11
+se/note.ogg note_slot12
+se/note.ogg note_slot13
+se/note.ogg note_slot14
+se/note.ogg note_slot15
+`.split("\n").filter(x=>x!=""&&x.charAt(0)!="#").map(x=>x.split(" "));
 
 const imgPath = `
 
-`.split("\n").filter(x=>x!=""&&x.charAt(0)!="#");
+`.split("\n").filter(x=>x!=""&&x.charAt(0)!="#").map(x=>x.split(" "));
 
 let pixelw = 3200, pixelh = 1800;
 
@@ -32,8 +47,6 @@ let mouseState = {
     left:false,
     middle:false,
     right:false,
-    touchx:[],
-    touchy:[]
 }, keydown = {};
 
 const canvas = document.getElementById("disp");
@@ -68,7 +81,7 @@ resize();
 let img = {}, loadedImgs = 0;
 imgPath.forEach(x=>{
     let i = new Image();
-    i.src = x;
+    i.src = x[0];
     i.addEventListener("load", ()=> {
         loadedImgs++;
         if (loadedImgs == imgPath.length) {
@@ -76,13 +89,13 @@ imgPath.forEach(x=>{
             if (loadedSnds == sndPath.length) canvas.dispatchEvent(new Event("allLoaded"));
         }
     });
-    img[x] = i;
+    img[x[1]||x[0]] = i;
 });
 
 let snd = {}, loadedSnds = 0;
 sndPath.forEach(x=>{
     let i = new Audio();
-    i.src = x;
+    i.src = x[0];
     i.addEventListener("loadeddata", ()=> {
         loadedSnds++;
         if (loadedSnds == sndPath.length) {
@@ -90,7 +103,7 @@ sndPath.forEach(x=>{
             if (loadedImgs == imgPath.length) canvas.dispatchEvent(new Event("allLoaded"));
         }
     });
-    snd[x] = i;
+    snd[x[1]||x[0]] = i;
 });
 
 ctx.__proto__.image =(name, x, y, w, h, ox = 0, oy = 0, r = 0)=> {
